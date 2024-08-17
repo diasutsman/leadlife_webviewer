@@ -4,11 +4,9 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:leadlife_webviewer/pull_to_refresh.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
-import 'package:webview_useragent/webview_useragent.dart';
 
 void main() {
   runApp(const MyApp());
@@ -66,7 +64,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-  final _webviewUserAgentPlugin = WebviewUserAgent();
   bool canPop = false;
 
   late DragGesturePullToRefresh dragGesturePullToRefresh; // Here
@@ -75,34 +72,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     ..setJavaScriptMode(JavaScriptMode.unrestricted)
     ..setBackgroundColor(const Color(0x00000000));
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformUserAgent;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformUserAgent =
-          await _webviewUserAgentPlugin.getPlatformUserAgent() ??
-              'Unknown platform UserAgent';
-    } on PlatformException {
-      platformUserAgent = 'Failed to get platform UserAgent.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    print("platformUserAgent: $platformUserAgent");
-    initController(platformUserAgent: "random");
-  }
-
   @override
   void initState() {
     super.initState();
     dragGesturePullToRefresh = DragGesturePullToRefresh(); // Here
     addFileSelectionListener();
-    initController();
+    initController(
+      // TODO: Find out how to make it so that facebook login works
+        // platformUserAgent: Platform.isIOS
+        //     ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_1_2 like Mac OS X) AppleWebKit/605.1.15'
+        //         ' (KHTML, like Gecko) Version/13.0.1 Mobile/15E148 Safari/604.1'
+        //     : 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) '
+        //         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Mobile Safari/537.36',
+
+        );
   }
 
   void addFileSelectionListener() async {
