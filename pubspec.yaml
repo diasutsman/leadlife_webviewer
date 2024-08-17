@@ -38,6 +38,7 @@ dependencies:
   webview_flutter: ^4.8.0
   webview_flutter_android: ^3.16.6
   file_picker: ^8.1.2
+  webview_useragent: ^1.0.0
 
 dev_dependencies:
   flutter_test:

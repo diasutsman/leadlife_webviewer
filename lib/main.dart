@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_useragent/webview_useragent.dart';
 
 void main() {
   runApp(const MyApp());
@@ -61,35 +64,40 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _webviewUserAgentPlugin = WebviewUserAgent();
+  bool canPop = false;
+
   final WebViewController _controller = WebViewController()
     ..setJavaScriptMode(JavaScriptMode.unrestricted)
-    ..setBackgroundColor(const Color(0x00000000))
-    ..setNavigationDelegate(
-      NavigationDelegate(
-        onProgress: (int progress) {
-          // Update loading bar.
-        },
-        onPageStarted: (String url) {},
-        onPageFinished: (String url) {},
-        onHttpError: (HttpResponseError error) {},
-        onWebResourceError: (WebResourceError error) {},
-        onNavigationRequest: (NavigationRequest request) {
-          // if (request.url.startsWith('https://www.youtube.com/')) {
-          //   return NavigationDecision.prevent;
-          // }
-          return NavigationDecision.navigate;
-        },
-      ),
-    )
-    ..setUserAgent("random")
-    ..loadRequest(Uri.parse('https://leadlife.id'));
+    ..setBackgroundColor(const Color(0x00000000));
 
-  bool canNavigate = false;
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initPlatformState() async {
+    String platformUserAgent;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    // We also handle the message potentially returning null.
+    try {
+      platformUserAgent =
+          await _webviewUserAgentPlugin.getPlatformUserAgent() ??
+              'Unknown platform UserAgent';
+    } on PlatformException {
+      platformUserAgent = 'Failed to get platform UserAgent.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    print("platformUserAgent: $platformUserAgent");
+    initController(platformUserAgent: "random");
+  }
 
   @override
   void initState() {
     super.initState();
     addFileSelectionListener();
+    initController();
   }
 
   void addFileSelectionListener() async {
@@ -119,10 +127,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final canNavigate = await _controller.canGoBack();
     if (canNavigate) {
       _controller.goBack();
-      return false;
-    } else {
-      return true;
     }
+    return !canNavigate;
   }
 
   @override
@@ -134,11 +140,13 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return PopScope(
-      canPop: canNavigate,
+      canPop: canPop,
       onPopInvokedWithResult: (didPop, result) async {
-        canNavigate = await _willPopCallback();
+        canPop = await _willPopCallback();
+        print("onPopInvokedWithResult: canPop: $canPop");
+        print("result: $result");
         setState(() {
-          canNavigate = canNavigate;
+          canPop = canPop;
         });
       },
       child: Scaffold(
@@ -149,5 +157,33 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  void initController({String platformUserAgent = 'random'}) {
+    _controller
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) async {
+            canPop = !(await _controller.canGoBack());
+            print("onPageFinished: canPop: $canPop");
+            setState(() {
+              canPop = canPop;
+            });
+          },
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (request) {
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..setUserAgent(
+        platformUserAgent,
+      )
+      ..loadRequest(Uri.parse('https://leadlife.id'));
   }
 }
