@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:leadlife_webviewer/pull_to_refresh.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_useragent/webview_useragent.dart';
@@ -63,9 +65,11 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final _webviewUserAgentPlugin = WebviewUserAgent();
   bool canPop = false;
+
+  late DragGesturePullToRefresh dragGesturePullToRefresh; // Here
 
   final WebViewController _controller = WebViewController()
     ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -96,6 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    dragGesturePullToRefresh = DragGesturePullToRefresh(); // Here
     addFileSelectionListener();
     initController();
   }
@@ -149,10 +154,21 @@ class _MyHomePageState extends State<MyHomePage> {
           canPop = canPop;
         });
       },
-      child: Scaffold(
-        body: SafeArea(
-          child: WebViewWidget(
-            controller: _controller,
+      child: RefreshIndicator(
+        triggerMode: RefreshIndicatorTriggerMode.onEdge,
+        onRefresh: dragGesturePullToRefresh.refresh, // Here
+        child: Scaffold(
+          body: SafeArea(
+            child: Builder(builder: (context) {
+              // IMPORTANT: Use the RefreshIndicator context!
+              dragGesturePullToRefresh.setContext(context); // Here
+              return WebViewWidget(
+                controller: _controller,
+                gestureRecognizers: {
+                  Factory(() => dragGesturePullToRefresh)
+                }, // Here
+              );
+            }),
           ),
         ),
       ),
@@ -166,16 +182,21 @@ class _MyHomePageState extends State<MyHomePage> {
           onProgress: (int progress) {
             // Update loading bar.
           },
-          onPageStarted: (String url) {},
+          onPageStarted: (String url) {
+            dragGesturePullToRefresh.started(); // Here
+          },
           onPageFinished: (String url) async {
             canPop = !(await _controller.canGoBack());
             print("onPageFinished: canPop: $canPop");
             setState(() {
               canPop = canPop;
             });
+            dragGesturePullToRefresh.finished(); // Here
           },
           onHttpError: (HttpResponseError error) {},
-          onWebResourceError: (WebResourceError error) {},
+          onWebResourceError: (WebResourceError error) {
+            dragGesturePullToRefresh.finished(); // Here
+          },
           onNavigationRequest: (request) {
             return NavigationDecision.navigate;
           },
@@ -185,5 +206,11 @@ class _MyHomePageState extends State<MyHomePage> {
         platformUserAgent,
       )
       ..loadRequest(Uri.parse('https://leadlife.id'));
+    dragGesturePullToRefresh // Here
+        .setController(_controller)
+        .setDragHeightEnd(200)
+        .setDragStartYDiff(10)
+        .setWaitToRestart(3000);
+    WidgetsBinding.instance.addObserver(this);
   }
 }
