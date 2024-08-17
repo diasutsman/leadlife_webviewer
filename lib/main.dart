@@ -61,7 +61,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  WebViewController controller = WebViewController()
+  final WebViewController _controller = WebViewController()
     ..setJavaScriptMode(JavaScriptMode.unrestricted)
     ..setBackgroundColor(const Color(0x00000000))
     ..setNavigationDelegate(
@@ -84,6 +84,8 @@ class _MyHomePageState extends State<MyHomePage> {
     ..setUserAgent("random")
     ..loadRequest(Uri.parse('https://leadlife.id'));
 
+  bool canNavigate = false;
+
   @override
   void initState() {
     super.initState();
@@ -92,14 +94,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void addFileSelectionListener() async {
     if (Platform.isAndroid) {
-      final androidController = controller.platform as AndroidWebViewController;
+      final androidController =
+          _controller.platform as AndroidWebViewController;
       await androidController.setOnShowFileSelector(_androidFilePicker);
     }
   }
 
   Future<List<String>> _androidFilePicker(
       final FileSelectorParams params) async {
-    print("params.acceptTypes: ${params.acceptTypes}");
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions:
@@ -113,6 +115,16 @@ class _MyHomePageState extends State<MyHomePage> {
     return [];
   }
 
+  Future<bool> _willPopCallback() async {
+    final canNavigate = await _controller.canGoBack();
+    if (canNavigate) {
+      _controller.goBack();
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -121,9 +133,20 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
-      body: WebViewWidget(
-        controller: controller,
+    return PopScope(
+      canPop: canNavigate,
+      onPopInvokedWithResult: (didPop, result) async {
+        canNavigate = await _willPopCallback();
+        setState(() {
+          canNavigate = canNavigate;
+        });
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: WebViewWidget(
+            controller: _controller,
+          ),
+        ),
       ),
     );
   }
