@@ -7,8 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:leadlife_webviewer/pull_to_refresh.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(const MyApp());
 }
 
@@ -64,6 +67,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   bool canPop = false;
 
+  static const leadIdUrl = 'https://leadlife.id';
+
   late DragGesturePullToRefresh dragGesturePullToRefresh; // Here
 
   final WebViewController _controller = WebViewController()
@@ -76,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     dragGesturePullToRefresh = DragGesturePullToRefresh(); // Here
     addFileSelectionListener();
     initController(
-      // TODO: Find out how to make it so that facebook login works
+        // TODO: Find out how to make it so that facebook login works
         // platformUserAgent: Platform.isIOS
         //     ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_1_2 like Mac OS X) AppleWebKit/605.1.15'
         //         ' (KHTML, like Gecko) Version/13.0.1 Mobile/15E148 Safari/604.1'
@@ -167,6 +172,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             dragGesturePullToRefresh.started(); // Here
           },
           onPageFinished: (String url) async {
+            print("url: $url");
+            print("leadIdUrl: $leadIdUrl");
+            if (url.contains(leadIdUrl)) {
+              FlutterNativeSplash.remove();
+            }
+
             canPop = !(await _controller.canGoBack());
             print("onPageFinished: canPop: $canPop");
             setState(() {
@@ -186,7 +197,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       ..setUserAgent(
         platformUserAgent,
       )
-      ..loadRequest(Uri.parse('https://leadlife.id'));
+      ..loadRequest(Uri.parse(leadIdUrl));
     dragGesturePullToRefresh // Here
         .setController(_controller)
         .setDragHeightEnd(200)
