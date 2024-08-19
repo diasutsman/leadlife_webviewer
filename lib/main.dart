@@ -4,11 +4,14 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:leadlife_webviewer/pull_to_refresh.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+// import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 void main() {
+    // it should be the first line in main method
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -66,9 +69,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   late DragGesturePullToRefresh dragGesturePullToRefresh; // Here
 
-  final WebViewController _controller = WebViewController()
-    ..setJavaScriptMode(JavaScriptMode.unrestricted)
-    ..setBackgroundColor(const Color(0x00000000));
+  // final WebViewController _controller = WebViewController()
+  //   ..setJavaScriptMode(JavaScriptMode.unrestricted)
+  //   ..setBackgroundColor(const Color(0x00000000));
 
   @override
   void initState() {
@@ -76,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     dragGesturePullToRefresh = DragGesturePullToRefresh(); // Here
     addFileSelectionListener();
     initController(
-      // TODO: Find out how to make it so that facebook login works
+        // TODO: Find out how to make it so that facebook login works
         // platformUserAgent: Platform.isIOS
         //     ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_1_2 like Mac OS X) AppleWebKit/605.1.15'
         //         ' (KHTML, like Gecko) Version/13.0.1 Mobile/15E148 Safari/604.1'
@@ -87,11 +90,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void addFileSelectionListener() async {
-    if (Platform.isAndroid) {
-      final androidController =
-          _controller.platform as AndroidWebViewController;
-      await androidController.setOnShowFileSelector(_androidFilePicker);
-    }
+    // if (Platform.isAndroid) {
+    //   final androidController =
+    //       _controller.platform as AndroidWebViewController;
+    //   await androidController.setOnShowFileSelector(_androidFilePicker);
+    // }
   }
 
   Future<List<String>> _androidFilePicker(
@@ -110,11 +113,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   Future<bool> _willPopCallback() async {
-    final canNavigate = await _controller.canGoBack();
-    if (canNavigate) {
-      _controller.goBack();
-    }
-    return !canNavigate;
+    // final canNavigate = await _controller.canGoBack();
+    // if (canNavigate) {
+    //   _controller.goBack();
+    // }
+    // return !canNavigate;
+    return false;
   }
 
   @override
@@ -126,30 +130,36 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return PopScope(
-      canPop: canPop,
-      onPopInvokedWithResult: (didPop, result) async {
-        canPop = await _willPopCallback();
-        print("onPopInvokedWithResult: canPop: $canPop");
-        print("result: $result");
-        setState(() {
-          canPop = canPop;
-        });
-      },
+      canPop: false,
+      // canPop: canPop,
+      // onPopInvokedWithResult: (didPop, result) async {
+      //   canPop = await _willPopCallback();
+      //   print("onPopInvokedWithResult: canPop: $canPop");
+      //   print("result: $result");
+      //   setState(() {
+      //     canPop = canPop;
+      //   });
+      // },
       child: RefreshIndicator(
         triggerMode: RefreshIndicatorTriggerMode.onEdge,
         onRefresh: dragGesturePullToRefresh.refresh, // Here
         child: Scaffold(
           body: SafeArea(
-            child: Builder(builder: (context) {
-              // IMPORTANT: Use the RefreshIndicator context!
-              dragGesturePullToRefresh.setContext(context); // Here
-              return WebViewWidget(
-                controller: _controller,
-                gestureRecognizers: {
-                  Factory(() => dragGesturePullToRefresh)
-                }, // Here
-              );
-            }),
+            child: InAppWebView(
+              initialUrlRequest: URLRequest(
+                url: WebUri("https://leadlife.id"),
+              ),
+            ),
+            // child: Builder(builder: (context) {
+            //   // IMPORTANT: Use the RefreshIndicator context!
+            //   dragGesturePullToRefresh.setContext(context); // Here
+            //   return WebViewWidget(
+            //     controller: _controller,
+            //     gestureRecognizers: {
+            //       Factory(() => dragGesturePullToRefresh)
+            //     }, // Here
+            //   );
+            // }),
           ),
         ),
       ),
@@ -157,41 +167,41 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void initController({String platformUserAgent = 'random'}) {
-    _controller
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            // Update loading bar.
-          },
-          onPageStarted: (String url) {
-            dragGesturePullToRefresh.started(); // Here
-          },
-          onPageFinished: (String url) async {
-            canPop = !(await _controller.canGoBack());
-            print("onPageFinished: canPop: $canPop");
-            setState(() {
-              canPop = canPop;
-            });
-            dragGesturePullToRefresh.finished(); // Here
-          },
-          onHttpError: (HttpResponseError error) {},
-          onWebResourceError: (WebResourceError error) {
-            dragGesturePullToRefresh.finished(); // Here
-          },
-          onNavigationRequest: (request) {
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..setUserAgent(
-        platformUserAgent,
-      )
-      ..loadRequest(Uri.parse('https://leadlife.id'));
-    dragGesturePullToRefresh // Here
-        .setController(_controller)
-        .setDragHeightEnd(200)
-        .setDragStartYDiff(10)
-        .setWaitToRestart(3000);
+    // _controller
+    //   ..setNavigationDelegate(
+    //     NavigationDelegate(
+    //       onProgress: (int progress) {
+    //         // Update loading bar.
+    //       },
+    //       onPageStarted: (String url) {
+    //         dragGesturePullToRefresh.started(); // Here
+    //       },
+    //       onPageFinished: (String url) async {
+    //         canPop = !(await _controller.canGoBack());
+    //         print("onPageFinished: canPop: $canPop");
+    //         setState(() {
+    //           canPop = canPop;
+    //         });
+    //         dragGesturePullToRefresh.finished(); // Here
+    //       },
+    //       onHttpError: (HttpResponseError error) {},
+    //       onWebResourceError: (WebResourceError error) {
+    //         dragGesturePullToRefresh.finished(); // Here
+    //       },
+    //       onNavigationRequest: (request) {
+    //         return NavigationDecision.navigate;
+    //       },
+    //     ),
+    //   )
+    //   ..setUserAgent(
+    //     platformUserAgent,
+    //   )
+    //   ..loadRequest(Uri.parse('https://leadlife.id'));
+    // dragGesturePullToRefresh // Here
+    //     .setController(_controller)
+    //     .setDragHeightEnd(200)
+    //     .setDragStartYDiff(10)
+    //     .setWaitToRestart(3000);
     WidgetsBinding.instance.addObserver(this);
   }
 }
