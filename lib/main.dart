@@ -8,10 +8,11 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:leadlife_webviewer/pull_to_refresh.dart';
 // import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() {
-    // it should be the first line in main method
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(const MyApp());
 }
 
@@ -66,6 +67,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   bool canPop = false;
+
+  static const leadIdUrl = 'https://leadlife.id';
 
   late DragGesturePullToRefresh dragGesturePullToRefresh; // Here
 
@@ -167,41 +170,47 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void initController({String platformUserAgent = 'random'}) {
-    // _controller
-    //   ..setNavigationDelegate(
-    //     NavigationDelegate(
-    //       onProgress: (int progress) {
-    //         // Update loading bar.
-    //       },
-    //       onPageStarted: (String url) {
-    //         dragGesturePullToRefresh.started(); // Here
-    //       },
-    //       onPageFinished: (String url) async {
-    //         canPop = !(await _controller.canGoBack());
-    //         print("onPageFinished: canPop: $canPop");
-    //         setState(() {
-    //           canPop = canPop;
-    //         });
-    //         dragGesturePullToRefresh.finished(); // Here
-    //       },
-    //       onHttpError: (HttpResponseError error) {},
-    //       onWebResourceError: (WebResourceError error) {
-    //         dragGesturePullToRefresh.finished(); // Here
-    //       },
-    //       onNavigationRequest: (request) {
-    //         return NavigationDecision.navigate;
-    //       },
-    //     ),
-    //   )
-    //   ..setUserAgent(
-    //     platformUserAgent,
-    //   )
-    //   ..loadRequest(Uri.parse('https://leadlife.id'));
-    // dragGesturePullToRefresh // Here
-    //     .setController(_controller)
-    //     .setDragHeightEnd(200)
-    //     .setDragStartYDiff(10)
-    //     .setWaitToRestart(3000);
+    _controller
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {
+            dragGesturePullToRefresh.started(); // Here
+          },
+          onPageFinished: (String url) async {
+            print("url: $url");
+            print("leadIdUrl: $leadIdUrl");
+            if (url.contains(leadIdUrl)) {
+              FlutterNativeSplash.remove();
+            }
+
+            canPop = !(await _controller.canGoBack());
+            print("onPageFinished: canPop: $canPop");
+            setState(() {
+              canPop = canPop;
+            });
+            dragGesturePullToRefresh.finished(); // Here
+          },
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {
+            dragGesturePullToRefresh.finished(); // Here
+          },
+          onNavigationRequest: (request) {
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..setUserAgent(
+        platformUserAgent,
+      )
+      ..loadRequest(Uri.parse(leadIdUrl));
+    dragGesturePullToRefresh // Here
+        .setController(_controller)
+        .setDragHeightEnd(200)
+        .setDragStartYDiff(10)
+        .setWaitToRestart(3000);
     WidgetsBinding.instance.addObserver(this);
   }
 }
