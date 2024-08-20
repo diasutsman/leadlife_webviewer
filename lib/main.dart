@@ -126,16 +126,17 @@ class _MyAppState extends State<MyApp> {
                             child: InAppWebView(
                               // Setting the windowId property is important here!
                               windowId: createWindowRequest.windowId,
-                              initialOptions: InAppWebViewGroupOptions(
-                                android: AndroidInAppWebViewOptions(
-                                  builtInZoomControls: true,
-                                  thirdPartyCookiesEnabled: true,
-                                ),
-                                crossPlatform: InAppWebViewOptions(
-                                    cacheEnabled: true,
-                                    javaScriptEnabled: true,
-                                    userAgent:
-                                        "Mozilla/5.0 (Linux; Android 9; LG-H870 Build/PKQ1.190522.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36"),
+                              initialSettings: InAppWebViewSettings(
+                                isInspectable: kDebugMode,
+                                mediaPlaybackRequiresUserGesture: false,
+                                alwaysBounceHorizontal: false,
+                                alwaysBounceVertical: false,
+                                userAgent: "random",
+                                supportMultipleWindows: true,
+                                allowsInlineMediaPlayback: true,
+                                iframeAllow: "camera; microphone",
+                                iframeAllowFullscreen: true,
+                                disallowOverScroll: true,
                               ),
                               onWebViewCreated:
                                   (InAppWebViewController controller) {},
