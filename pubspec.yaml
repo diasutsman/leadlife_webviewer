@@ -71,6 +71,19 @@ flutter_launcher_icons:
   macos:
     generate: true
 
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/icon/icon.png
+
+  # color_dark: "#DB402F"
+  # image_dark: assets/icon/icon-splash-white.png
+  android: true
+  ios: true
+
+  android_12:
+    color: "#ffffff"
+    image: assets/icon/icon.png
+
 # The following section is specific to Flutter packages.
 flutter:
   # The following line ensures that the Material Icons font is
@@ -108,12 +121,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
-flutter_native_splash:
-  android: true
-  ios: true
-  color: "#ffffff"
-  image: assets/icon/icon.png
-  android_12:
-    color: "#ffffff"
-    image: assets/icon/icon.png
