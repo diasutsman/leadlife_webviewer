@@ -73,7 +73,7 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#ffffff"
-  image: assets/icon/icon.png
+  image: assets/icon/icon-big.png
 
   # color_dark: "#DB402F"
   # image_dark: assets/icon/icon-splash-white.png
@@ -82,7 +82,7 @@ flutter_native_splash:
 
   android_12:
     color: "#ffffff"
-    image: assets/icon/icon.png
+    image: assets/icon/icon-big.png
 
 # The following section is specific to Flutter packages.
 flutter:
