@@ -14,6 +14,7 @@ Future main() async {
   runApp(
     const MaterialApp(
       home: MyApp(),
+      title: "Leadlife.id",
       debugShowCheckedModeBanner: false,
     ),
   );
@@ -37,7 +38,8 @@ class _MyAppState extends State<MyApp> {
     mediaPlaybackRequiresUserGesture: false,
     alwaysBounceHorizontal: false,
     alwaysBounceVertical: false,
-    userAgent: "random",
+    userAgent:
+        "Mozilla/5.0 (Linux; Android 9; LG-H870 Build/PKQ1.190522.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36",
     supportMultipleWindows: true,
     allowsInlineMediaPlayback: true,
     iframeAllow: "camera; microphone",
@@ -109,6 +111,56 @@ class _MyAppState extends State<MyApp> {
                     return PermissionResponse(
                         resources: request.resources,
                         action: PermissionResponseAction.GRANT);
+                  },
+                  onCreateWindow: (controller, createWindowRequest) async {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          insetPadding: EdgeInsets.zero,
+                          contentPadding: EdgeInsets.zero,
+                          backgroundColor: Colors.transparent,
+                          content: SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height,
+                            child: InAppWebView(
+                              // Setting the windowId property is important here!
+                              windowId: createWindowRequest.windowId,
+                              initialOptions: InAppWebViewGroupOptions(
+                                android: AndroidInAppWebViewOptions(
+                                  builtInZoomControls: true,
+                                  thirdPartyCookiesEnabled: true,
+                                ),
+                                crossPlatform: InAppWebViewOptions(
+                                    cacheEnabled: true,
+                                    javaScriptEnabled: true,
+                                    userAgent:
+                                        "Mozilla/5.0 (Linux; Android 9; LG-H870 Build/PKQ1.190522.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36"),
+                              ),
+                              onWebViewCreated:
+                                  (InAppWebViewController controller) {},
+                              onLoadStart: (InAppWebViewController controller,
+                                  WebUri? url) {
+                                print("onLoadStart popup $url");
+                              },
+                              onLoadStop: (InAppWebViewController controller,
+                                  WebUri? url) async {
+                                print("onLoadStop popup $url");
+                              },
+                              onCloseWindow: (controller) {
+                                // On Facebook Login, this event is called twice,
+                                // so here we check if we already popped the alert dialog context
+                                if (Navigator.canPop(context)) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    );
+
+                    return true;
                   },
                   shouldOverrideUrlLoading:
                       (controller, navigationAction) async {
