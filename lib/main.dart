@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future main() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: binding);
-
+  await Permission.camera.request();
+  await Permission.microphone.request(); // if you need microphone permission
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
     await InAppWebViewController.setWebContentsDebuggingEnabled(kDebugMode);
   }
@@ -181,7 +183,7 @@ class _MyAppState extends State<MyApp> {
                   shouldOverrideUrlLoading:
                       (controller, navigationAction) async {
                     var uri = navigationAction.request.url!;
-
+                    print("shouldOverrideUrlLoading uri: $uri");
                     if (![
                       "http",
                       "https",
