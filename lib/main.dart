@@ -3,13 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:leadlife_webviewer/colors.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future main() async {
-  final binding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: binding);
+  WidgetsFlutterBinding.ensureInitialized();
   await Permission.camera.request();
   await Permission.microphone.request(); // if you need microphone permission
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
@@ -17,10 +16,13 @@ Future main() async {
   }
 
   runApp(
-    const MaterialApp(
-      home: MyApp(),
+    MaterialApp(
+      home: const MyApp(),
       title: "Leadlife.id",
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: colorPrimary,
+      ),
     ),
   );
 }
@@ -65,7 +67,7 @@ class _MyAppState extends State<MyApp> {
         ? null
         : PullToRefreshController(
             settings: PullToRefreshSettings(
-              color: Colors.blue,
+              color: colorPrimary,
             ),
             onRefresh: () async {
               if (defaultTargetPlatform == TargetPlatform.android) {
@@ -104,6 +106,15 @@ class _MyAppState extends State<MyApp> {
         body: SafeArea(
           child: Column(
             children: [
+              progress < 1.0
+                  ? LinearProgressIndicator(
+                      value: progress,
+                      color: colorPrimary,
+                    )
+                  : const LinearProgressIndicator(
+                      value: 1,
+                      color: Colors.black,
+                    ),
               Expanded(
                 child: InAppWebView(
                   key: webViewKey,
@@ -206,9 +217,6 @@ class _MyAppState extends State<MyApp> {
                     return NavigationActionPolicy.ALLOW;
                   },
                   onLoadStop: (controller, url) async {
-                    if (url.toString().contains(leadIdUrl)) {
-                      FlutterNativeSplash.remove();
-                    }
                     pullToRefreshController?.endRefreshing();
                     setState(() {
                       this.url = url.toString();
