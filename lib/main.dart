@@ -170,11 +170,11 @@ class _MyAppState extends State<MyApp> {
                                   (InAppWebViewController controller) {},
                               onLoadStart: (InAppWebViewController controller,
                                   WebUri? url) {
-                                print("onLoadStart popup $url");
+                                debugPrint("onLoadStart popup $url");
                               },
                               onLoadStop: (InAppWebViewController controller,
                                   WebUri? url) async {
-                                print("onLoadStop popup $url");
+                                debugPrint("onLoadStop popup $url");
                               },
                               onCloseWindow: (controller) {
                                 // On Facebook Login, this event is called twice,
@@ -194,7 +194,7 @@ class _MyAppState extends State<MyApp> {
                   shouldOverrideUrlLoading:
                       (controller, navigationAction) async {
                     var uri = navigationAction.request.url!;
-                    print("shouldOverrideUrlLoading uri: $uri");
+                    debugPrint("shouldOverrideUrlLoading uri: $uri");
                     if (![
                       "http",
                       "https",
@@ -243,7 +243,7 @@ class _MyAppState extends State<MyApp> {
                   },
                   onConsoleMessage: (controller, consoleMessage) {
                     if (kDebugMode) {
-                      print(consoleMessage);
+                      debugPrint(consoleMessage.toString());
                     }
                   },
                 ),
