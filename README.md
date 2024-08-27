@@ -36,3 +36,9 @@ dart run build_runner clean && dart run build_runner build --delete-conflicting-
 
 flutter run
 ```
+
+note:
+if you change .env file and it doesn't read the changes just run this command again before running it:
+```
+dart run build_runner clean && dart run build_runner build --delete-conflicting-outputs
+```
