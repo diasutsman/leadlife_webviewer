@@ -12,6 +12,7 @@ Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Permission.camera.request();
   await Permission.microphone.request(); // if you need microphone permission
+  await Permission.location.request(); // if you need microphone permission
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
     await InAppWebViewController.setWebContentsDebuggingEnabled(kDebugMode);
   }
@@ -122,6 +123,11 @@ class _MyAppState extends State<MyApp> {
                     ),
               Expanded(
                 child: InAppWebView(
+                  onGeolocationPermissionsShowPrompt:
+                      (webViewController, origin) async {
+                    return GeolocationPermissionShowPromptResponse(
+                        allow: true, origin: origin, retain: true);
+                  },
                   key: webViewKey,
                   initialUrlRequest: URLRequest(
                     url: WebUri(
@@ -157,6 +163,14 @@ class _MyAppState extends State<MyApp> {
                             width: MediaQuery.of(context).size.width,
                             height: MediaQuery.of(context).size.height,
                             child: InAppWebView(
+                              onGeolocationPermissionsShowPrompt:
+                                  (webViewController, origin) async {
+                                return GeolocationPermissionShowPromptResponse(
+                                  allow: true,
+                                  origin: origin,
+                                  retain: true,
+                                );
+                              },
                               // Setting the windowId property is important here!
                               windowId: createWindowRequest.windowId,
                               initialSettings: InAppWebViewSettings(
