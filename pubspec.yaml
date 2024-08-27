@@ -38,6 +38,7 @@ dependencies:
   flutter_inappwebview: ^6.0.0
   url_launcher: ^6.3.0
   permission_handler: ^11.3.1
+  envied: ^0.5.4+1
 
 dev_dependencies:
   flutter_native_splash: ^2.4.1
@@ -51,6 +52,8 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.13.1
+  envied_generator: ^0.5.4+1
+  build_runner: ^2.4.12
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:leadlife_webviewer/colors.dart';
+import 'package:leadlife_webviewer/env.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -37,7 +38,11 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final GlobalKey webViewKey = GlobalKey();
 
-  static const String leadIdUrl = "https://leadlife.id/";
+  static String get leadIdUrl => Env.isAdvisor
+      ? "https://leadlife.id/login/advisor"
+      : Env.isUser
+          ? "https://leadlife.id"
+          : "https://leadlife.id";
 
   InAppWebViewController? webViewController;
   InAppWebViewSettings settings = InAppWebViewSettings(
