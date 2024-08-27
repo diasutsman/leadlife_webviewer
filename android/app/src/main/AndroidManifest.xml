@@ -8,9 +8,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <!-- * Use it when building either advisor or user -->
+    <!-- android:label="Leadlife.id Advisor" -->
+    <!-- android:label="Leadlife.id" -->
     <application
         android:usesCleartextTraffic="true"
-        android:label="Leadlife.id"
+        android:label="${applicationLabel}"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <provider

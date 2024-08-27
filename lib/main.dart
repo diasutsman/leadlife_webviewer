@@ -20,7 +20,11 @@ Future main() async {
   runApp(
     MaterialApp(
       home: const MyApp(),
-      title: "Leadlife.id",
+      title: Env.isAdvisor
+          ? "Leadlife.id Advisor"
+          : Env.isUser
+              ? "Leadlife.id"
+              : "Leadlife.id",
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: colorPrimary,

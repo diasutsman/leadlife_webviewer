@@ -16,8 +16,19 @@ advisor: Show "https://leadlife.id/login/advisor" as the webview
 
 user: Show "https://leadlife.id" as the webview
 
+2. For Android, add this line to "android\local.properties":
+   
+   Same as in the .env, you can choose between "advisor" and "user" but make sure it is the same as written in the .env
 
-2. Run these commands
+```
+mode=advisor
+```
+or 
+```
+mode=user
+``` 
+
+3. Run these commands
 ```console
 flutter pub get
 
